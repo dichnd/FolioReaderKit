@@ -171,6 +171,9 @@ extension Highlight {
 
             try realm.commitWrite()
             
+            if highlight != nil {
+                NotificationCenter.default.post(name: .FolioUpdateHighlight, object: nil, userInfo: Highlight.toHashMap(highlight))
+            }
         } catch let error as NSError {
             print("Error on updateById: \(error)")
         }
@@ -229,6 +232,37 @@ extension Highlight {
         var endOffset: String
         var bookId: String
         var currentPage: Int
+    }
+    
+    public static func toHashMap(_ highlight: Highlight?) -> [String: Any] {
+        return [
+            "bookId": highlight?.bookId,
+            "content": highlight?.content,
+            "contentId": highlight?.content,
+            "contentPost": highlight?.contentPost,
+            "contentPre": highlight?.contentPre,
+            "highlightId": highlight?.highlightId,
+            "page": highlight?.page,
+            "type": highlight?.type,
+            "startOffset": highlight?.startOffset,
+            "endOffset": highlight?.endOffset,
+            "noteForHightlight": highlight?.noteForHighlight
+        ]
+    }
+    
+    public static func fromHashMap(_ info: [String: Any]?) -> Highlight {
+        let highlight = Highlight()
+        highlight.highlightId = info?["highlightId"] as? String
+        highlight.type = info?["type"] as! Int
+        highlight.date = Date()
+        highlight.content = info?["content"] as! String
+        highlight.contentPre = info?["contentPre"] as? String
+        highlight.contentPost = info?["contentPost"] as? String
+        highlight.page = info?["page"] as! Int
+        highlight.bookId = info?["bookId"] as! String
+        highlight.startOffset = info?["startOffset"] as! Int
+        highlight.endOffset = info?["endOffset"] as! Int
+        return highlight
     }
 
     /**

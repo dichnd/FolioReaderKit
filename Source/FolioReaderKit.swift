@@ -90,6 +90,13 @@ public enum MediaOverlayStyle: Int {
     /// Called when reader did closed.
     @available(*, deprecated, message: "Use 'folioReaderDidClose(_ folioReader: FolioReader)' instead.")
     @objc optional func folioReaderDidClosed()
+    
+    func onHighlight(_ highlight: Highlight)
+    func onUpdateHighlight(_ highlight: Highlight)
+    func onDeleteHighlight(_ highlightId: String)
+    func onHighlightNote(_ highlight: Highlight)
+    func onUpdateHighlightNote(_ highlight: Highlight)
+    func onHighlightShare(_ highlight: Highlight)
 }
 
 /// Main Library class with some useful constants and methods
@@ -138,6 +145,12 @@ open class FolioReader: NSObject {
         removeObservers()
         NotificationCenter.default.addObserver(self, selector: #selector(saveReaderState), name: .UIApplicationWillResignActive, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(saveReaderState), name: .UIApplicationWillTerminate, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(onHighlight(_:)), name: .FolioNewHighlight, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(onUpdateHighlight(_:)), name: .FolioUpdateHighlight, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(onHighlightNote(_:)), name: .FolioNewHighlightWithNote, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(onUpdateHighlightNote(_:)), name: .FolioUpdateHighlightNote, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(onShareHighlight(_:)), name: .FolioShareHighlight, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(onDeleteHighlight(_:)), name: .FolioDeleteHighlight, object: nil)
     }
 
     /// Remove necessary observers
@@ -350,6 +363,36 @@ extension FolioReader {
             ] as [String : Any]
 
         self.savedPositionForCurrentBook = position
+    }
+    
+    @objc open func onHighlight(_ notification: Notification) {
+        let highlight = Highlight.fromHashMap(notification.userInfo as? [String: Any])
+        self.delegate?.onHighlight(highlight)
+    }
+    
+    @objc open func onUpdateHighlight(_ notification: Notification) {
+        let highlight = Highlight.fromHashMap(notification.userInfo as? [String: Any])
+        self.delegate?.onUpdateHighlight(highlight)
+    }
+    
+    @objc open func onHighlightNote(_ notification: Notification) {
+        let highlight = Highlight.fromHashMap(notification.userInfo as? [String: Any])
+        self.delegate?.onHighlightNote(highlight)
+    }
+    
+    @objc open func onUpdateHighlightNote(_ notification: Notification) {
+        let highlight = Highlight.fromHashMap(notification.userInfo as? [String: Any])
+        self.delegate?.onUpdateHighlightNote(highlight)
+    }
+    
+    @objc open func onDeleteHighlight(_ notification: Notification) {
+        let highlightId = (notification.userInfo as? [String: Any])?["highlightId"] as? String
+        self.delegate?.onDeleteHighlight(highlightId!)
+    }
+    
+    @objc open func onShareHighlight(_ notification: Notification) {
+        let highlight = Highlight.fromHashMap(notification.userInfo as? [String: Any])
+        self.delegate?.onHighlightShare(highlight)
     }
 
     /// Closes and save the reader current instance.

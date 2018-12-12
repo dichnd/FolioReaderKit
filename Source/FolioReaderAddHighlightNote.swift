@@ -171,10 +171,12 @@ class FolioReaderAddHighlightNote: UIViewController {
                 highlight.noteForHighlight = textView.text
                 highlightSaved = true
                 try! realm.commitWrite()
+                NotificationCenter.default.post(name: .FolioUpdateHighlightNote, object: nil, userInfo: Highlight.toHashMap(highlight))
             } else {
                 highlight.noteForHighlight = textView.text
                 highlight.persist(withConfiguration: readerConfig)
                 highlightSaved = true
+                NotificationCenter.default.post(name: .FolioNewHighlightWithNote, object: nil, userInfo: Highlight.toHashMap(highlight))
             }
         }
         

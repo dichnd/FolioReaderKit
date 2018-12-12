@@ -470,12 +470,12 @@ internal extension UINavigationBar {
 
     func hideBottomHairline() {
         let navigationBarImageView = hairlineImageViewInNavigationBar(self)
-        navigationBarImageView!.isHidden = true
+        navigationBarImageView?.isHidden = true
     }
 
     func showBottomHairline() {
         let navigationBarImageView = hairlineImageViewInNavigationBar(self)
-        navigationBarImageView!.isHidden = false
+        navigationBarImageView?.isHidden = false
     }
 
     fileprivate func hairlineImageViewInNavigationBar(_ view: UIView) -> UIImageView? {
@@ -534,4 +534,13 @@ extension Array {
     subscript(safe index: Int) -> Element? {
         return indices ~= index ? self[index] : nil
     }
+}
+
+extension NSNotification.Name {
+    public static let FolioNewHighlight = NSNotification.Name("FolioNewHighlight")
+    public static let FolioUpdateHighlight = NSNotification.Name("FolioUpdateHighlight")
+    public static let FolioNewHighlightWithNote = NSNotification.Name(rawValue: "FolioNewHighlightWithNote")
+    public static let FolioUpdateHighlightNote = NSNotification.Name("FolioUpdateHighlightNote")
+    public static let FolioDeleteHighlight = NSNotification.Name("FolioDeleteHighlight")
+    public static let FolioShareHighlight = NSNotification.Name("FolioShareHighlight")
 }

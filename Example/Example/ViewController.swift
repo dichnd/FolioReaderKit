@@ -9,8 +9,7 @@
 import UIKit
 import FolioReaderKit
 
-class ViewController: UIViewController {
-
+class ViewController: UIViewController, FolioReaderDelegate {
     @IBOutlet weak var bookOne: UIButton?
     @IBOutlet weak var bookTwo: UIButton?
     let folioReader = FolioReader()
@@ -23,6 +22,27 @@ class ViewController: UIViewController {
 
         self.setCover(self.bookOne, index: 0)
         self.setCover(self.bookTwo, index: 1)
+        
+        folioReader.delegate = self
+    }
+    
+    func onHighlight(_ highlight: Highlight) {
+        print("onHighlight")
+    }
+    func onUpdateHighlight(_ highlight: Highlight) {
+        print("onUpdateHighlight")
+    }
+    func onDeleteHighlight(_ highlightId: String) {
+        print("onDeleteHighlight")
+    }
+    func onHighlightNote(_ highlight: Highlight) {
+        print("onHighlightNote")
+    }
+    func onUpdateHighlightNote(_ highlight: Highlight) {
+        print("onUpdateHighlightNote")
+    }
+    func onHighlightShare(_ highlight: Highlight) {
+        print("onHighlightShare")
     }
 
     private func readerConfiguration(forEpub epub: Epub) -> FolioReaderConfig {

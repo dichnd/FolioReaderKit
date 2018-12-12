@@ -73,6 +73,11 @@ open class FolioReaderWebView: UIWebView {
     // MARK: - UIMenuController - Actions
 
     @objc func share(_ sender: UIMenuController) {
+        let highlight = self.highlight(sender)
+        if highlight != nil {
+            NotificationCenter.default.post(name: .FolioShareHighlight, object: nil, userInfo: Highlight.toHashMap(highlight))
+        }
+        
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
 
         let shareImage = UIAlertAction(title: self.readerConfig.localizedShareImageQuote, style: .default, handler: { (action) -> Void in
@@ -126,11 +131,12 @@ open class FolioReaderWebView: UIWebView {
     func remove(_ sender: UIMenuController?) {
         if let removedId = js("removeThisHighlight()") {
             Highlight.removeById(withConfiguration: self.readerConfig, highlightId: removedId)
+            NotificationCenter.default.post(name: .FolioDeleteHighlight, object: nil, userInfo: ["highlightId": removedId])
         }
         setMenuVisible(false)
     }
 
-    @objc func highlight(_ sender: UIMenuController?) {
+    @objc func highlight(_ sender: UIMenuController?) -> Highlight? {
         let highlightAndReturn = js("highlightString('\(HighlightStyle.classForStyle(self.folioReader.currentHighlightStyle))')")
         let jsonData = highlightAndReturn?.data(using: String.Encoding.utf8)
 
@@ -139,10 +145,10 @@ open class FolioReaderWebView: UIWebView {
             let dic = json.firstObject as! [String: String]
             let rect = CGRectFromString(dic["rect"]!)
             guard let startOffset = dic["startOffset"] else {
-                return
+                return nil
             }
             guard let endOffset = dic["endOffset"] else {
-                return
+                return nil
             }
 
             createMenu(options: true)
@@ -153,7 +159,7 @@ open class FolioReaderWebView: UIWebView {
                 let html = js("getHTML()"),
                 let identifier = dic["id"],
                 let bookId = (self.book.name as NSString?)?.deletingPathExtension else {
-                    return
+                    return nil
             }
 
             let pageNumber = folioReader.readerCenter?.currentPageNumber ?? 0
@@ -161,28 +167,33 @@ open class FolioReaderWebView: UIWebView {
             let highlight = Highlight.matchHighlight(match)
             highlight?.persist(withConfiguration: self.readerConfig)
 
+            if highlight != nil {
+                NotificationCenter.default.post(name: .FolioNewHighlight, object: nil, userInfo: Highlight.toHashMap(highlight))
+            }
+            return highlight
         } catch {
             print("Could not receive JSON")
         }
+        return nil
     }
     
     @objc func highlightWithNote(_ sender: UIMenuController?) {
         let highlightAndReturn = js("highlightStringWithNote('\(HighlightStyle.classForStyle(self.folioReader.currentHighlightStyle))')")
         let jsonData = highlightAndReturn?.data(using: String.Encoding.utf8)
-        
+
         do {
             let json = try JSONSerialization.jsonObject(with: jsonData!, options: []) as! NSArray
             let dic = json.firstObject as! [String: String]
             let rect = CGRectFromString(dic["rect"]!)
             guard let startOffset = dic["startOffset"] else { return }
             guard let endOffset = dic["endOffset"] else { return }
-            
+
             self.clearTextSelection()
-            
+
             guard let html = js("getHTML()") else { return }
             guard let identifier = dic["id"] else { return }
             guard let bookId = (self.book.name as NSString?)?.deletingPathExtension else { return }
-            
+
             let pageNumber = folioReader.readerCenter?.currentPageNumber ?? 0
             let match = Highlight.MatchingHighlight(text: html, id: identifier, startOffset: startOffset, endOffset: endOffset, bookId: bookId, currentPage: pageNumber)
             if let highlight = Highlight.matchHighlight(match) {

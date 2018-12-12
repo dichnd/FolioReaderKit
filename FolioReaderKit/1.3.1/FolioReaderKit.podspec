@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
   s.screenshots     = "https://raw.githubusercontent.com/FolioReader/FolioReaderKit/assets/custom-fonts.gif", "https://raw.githubusercontent.com/FolioReader/FolioReaderKit/assets/highlight.gif"
   s.license          = 'BSD'
   s.author           = { "Heberti Almeida" => "hebertialmeida@gmail.com" }
-  s.source           = { :git => "https://github.com/dichnd/FolioReaderKit.git", :tag => s.version.to_s }
+  s.source           = { :git => "https://github.com/dichnd/SD-FolioReaderKit.git", :tag => s.version.to_s }
   s.social_media_url = 'https://twitter.com/hebertialmeida'
 
   s.swift_version = '4.0'
